@@ -55,6 +55,14 @@ public class Produto implements Serializable {
         this.idProduto = idProduto;
     }
 
+    public Produto(Integer idProduto, String nome, Integer quantidade, Float precoVenda) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public Produto(Integer idProduto, String nome, Integer quantidade, Float precoVenda) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     public Integer getIdProduto() {
         return idProduto;
     }
@@ -116,4 +124,4 @@ public class Produto implements Serializable {
         return "cadastroee.model.Produto[ idProduto=" + idProduto + " ]";
     }
 
-}
+} 
