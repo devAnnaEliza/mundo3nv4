@@ -1,7 +1,7 @@
 package cadastroee.servlets;
 
 import cadastroee.model.Produto;
-import cadastroee.controller.ProdutoFacadeLocal;
+import cadastroee.controller.ProdutoFacadeLocal; // Assuming DadosProdutoLocal is the correct interface
 import java.io.IOException;
 import java.util.List;
 import jakarta.ejb.EJB;
@@ -15,80 +15,77 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ServletProdutoFC extends HttpServlet {
 
     @EJB
-    private ProdutoFacadeLocal facade;
+    private ProdutoFacadeLocal dadosProduto;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String acao = request.getParameter("acao");
-        String destino = "ProdutoLista.jsp"; // Página padrão de destino
-        
+        String destino = "ListaProduto.jsp"; // Default destination page
+
         if (acao != null) {
             switch (acao) {
                 case "listar":
-                    List<Produto> produtos = facade.findAll(); // Recuperando todos os produtos
+                    List<Produto> produtos = dadosProduto.obterTodosProdutos(); // Retrieve all products
                     request.setAttribute("produtos", produtos);
                     break;
                 case "formAlterar":
                     String idProdutoStr = request.getParameter("idProduto");
                     if (idProdutoStr != null) {
                         Integer idProduto = Integer.parseInt(idProdutoStr);
-                        Produto produto = facade.find(idProduto); // Recuperando um produto pelo ID
+                        Produto produto = dadosProduto.obterProdutoPorId(idProduto); // Retrieve product by ID
                         request.setAttribute("produto", produto);
-                        destino = "ProdutoDados.jsp";
+                        destino = "DadosProduto.jsp";
                     }
                     break;
                 case "formIncluir":
-                    // Ação para exibir o formulário de inclusão
-                    destino = "ProdutoDados.jsp";
+                    // Action to display the inclusion form
+                    destino = "DadosProduto.jsp";
                     break;
                 case "excluir":
                     String idProdutoStr = request.getParameter("idProduto");
                     if (idProdutoStr != null) {
                         Integer idProduto = Integer.parseInt(idProdutoStr);
-                        Produto produto = facade.find(idProduto); // Recuperando um produto pelo ID
+                        Produto produto = dadosProduto.obterProdutoPorId(idProduto); // Retrieve product by ID
                         if (produto != null) {
-                            facade.remove(produto);
+                            dadosProduto.excluirProduto(produto);
                         }
-                        // Recarregando a lista após a exclusão
-                        produtos = facade.findAll(); // Recuperando todos os produtos
+                        // Reload the list after deletion
+                        produtos = dadosProduto.obterTodosProdutos(); // Retrieve all products
                         request.setAttribute("produtos", produtos);
                     }
                     break;
                 case "alterar":
                 case "incluir":
-                    // Recuperando os parâmetros do formulário
-                    Integer idProduto = null;
+                    // Retrieve form parameters
+                    Integer idProduto = parseIntegerParameter(request, "idProduto");
                     String nome = request.getParameter("nome");
                     Integer quantidade = parseIntegerParameter(request, "quantidade");
                     Float precoVenda = parseFloatParameter(request, "precoVenda");
-                    
-                    // Convertendo valores se estiverem disponíveis
-                    idProduto = parseIntegerParameter(request, "idProduto");
 
-                    // Criando ou atualizando o produto
+                    // Create or update the product
                     Produto produto;
                     if (acao.equals("alterar")) {
-                        produto = facade.find(idProduto); // Recuperando um produto pelo ID
+                        produto = dadosProduto.obterProdutoPorId(idProduto); // Retrieve product by ID
                         produto.setNome(nome);
                         produto.setQuantidade(quantidade);
                         produto.setPrecoVenda(precoVenda);
                     } else {
                         produto = new Produto(idProduto, nome, quantidade, precoVenda);
                     }
-                    facade.edit(produto); // Inserindo ou atualizando um produto
-                    
-                    // Recarregando a lista após a inclusão ou atualização
-                    produtos = facade.findAll(); // Recuperando todos os produtos
+                    dadosProduto.salvarProduto(produto); // Insert or update a product
+
+                    // Reload the list after inclusion or update
+                    produtos = dadosProduto.obterTodosProdutos(); // Retrieve all products
                     request.setAttribute("produtos", produtos);
                     break;
                 default:
-                    // Ação desconhecida
+                    // Unknown action
                     break;
             }
         }
-        
-        // Redirecionamento para o destino apropriado
+
+        // Forward to the appropriate destination
         request.getRequestDispatcher(destino).forward(request, response);
     }
 
